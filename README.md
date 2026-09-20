@@ -10,12 +10,12 @@
 
 ## Building
 
-## Prerequisites
+### Prerequisites
 
 - Rust
 - Rust x86_64-pc-windows-gnu toolchain
 
-## How to build
+### How to build
 
 1. Clone this repo: `git clone https://github.com/Karlito05/SIMple-Bridge.git`
 2. Change directory into the root folder of the project: `cd ./SIMpleBridge`
