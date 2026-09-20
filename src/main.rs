@@ -1,3 +1,5 @@
+use std::fs::OpenOptions;
+use std::io::{Seek, SeekFrom, Write};
 use windows_sys::Win32::Foundation::CloseHandle;
 use windows_sys::Win32::System::Memory::{
     FILE_MAP_READ, MapViewOfFile, OpenFileMappingW, UnmapViewOfFile,
@@ -5,6 +7,14 @@ use windows_sys::Win32::System::Memory::{
 
 fn main() {
     let out_path = r"Z:\dev\shm\LMU_Data"; // real path on your Linux host
+    let mut file = OpenOptions::new()
+        .create(true)
+        .truncate(true)
+        .write(true)
+        .open(out_path)
+        .unwrap();
+    file.set_len(std::mem::size_of::<SharedMemoryObjectOut>() as u64)
+        .unwrap(); // pre-size once
 
     loop {
         if let Some(tel) = update_telemetry() {
@@ -14,11 +24,10 @@ fn main() {
                     std::mem::size_of::<SharedMemoryObjectOut>(),
                 )
             };
-            if let Err(e) = std::fs::write(out_path, bytes) {
-                eprintln!("write failed: {e}");
-            }
+            file.seek(SeekFrom::Start(0)).unwrap();
+            file.write_all(bytes).unwrap(); // overwrite in place, file size never changes
         }
-        std::thread::sleep(std::time::Duration::from_millis(8)); // don't busy-loop a core
+        std::thread::sleep(std::time::Duration::from_millis(8));
     }
 }
 
